@@ -32,3 +32,10 @@ class States(IntEnum):
     SUPER_CHLORINATE = 1 << 25
     HEATER_AUTO_MODE = 1 << 30  # This is a kludge for the heater auto mode
     FILTER_LOW_SPEED = 1 << 31  # This is a kludge for the low-speed filter
+#Mod J4yDubs - Add missing buttons - Begin
+    RIGHT = 1 << 32
+    MENU = 1 << 33
+    LEFT = 1 << 34
+    MINUS = 1 << 35
+    PLUS = 1 << 36
+ #Mod J4yDubs End

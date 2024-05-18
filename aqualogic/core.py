@@ -12,12 +12,12 @@ import time
 import serial
 import datetime
 
-from .web import WebServer
+#Commented out all web server code
+#from .web import WebServer
 from .states import States
 from .keys import Keys
 
 _LOGGER = logging.getLogger(__name__)
-
 
 class AquaLogic():
     """Hayward/Goldline AquaLogic/ProLogic pool controller."""
@@ -27,7 +27,8 @@ class AquaLogic():
     FRAME_STX = 0x02
     FRAME_ETX = 0x03
 
-    READ_TIMEOUT = 5
+#    READ_TIMEOUT = 5
+    READ_TIMEOUT = 10
 
     # Local wired panel (black face with service button)
     FRAME_TYPE_LOCAL_WIRED_KEY_EVENT = b'\x00\x02'
@@ -44,7 +45,8 @@ class AquaLogic():
     FRAME_TYPE_PUMP_SPEED_REQUEST = b'\x0c\x01'
     FRAME_TYPE_PUMP_STATUS = b'\x00\x0c'
 
-    def __init__(self, web_port=8129):
+#    def __init__(self, web_port=8129):
+    def __init__(self):
         self._socket = None
         self._serial = None
         self._io = None
@@ -62,23 +64,34 @@ class AquaLogic():
         self._flashing_states = 0
         self._send_queue = queue.Queue()
         self._multi_speed_pump = False
+# Mod J4yDubs Begin
         self._heater_auto_mode = True  # Assume the heater is in auto mode
+        self._heater_enabled = False
+        self._super_chlor_time_remain = '00:00'
+        self._display = None
 
-        if web_port and web_port != 0:
-            # Start the web server
-            self._web = WebServer(self)
-            self._web.start(web_port)
+#        if web_port and web_port != 0:
+#            # Start the web server
+#            self._web = WebServer(self)
+#            self._web.start(web_port)
+# Mod J4yDubs End
 
     def connect(self, host, port):
         self.connect_socket(host, port)
 
     def connect_socket(self, host, port):
         """Connects via a RS-485 to Ethernet adapter."""
+# Mod J4yDubs - Added try,except - Begin        
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._socket.connect((host, port))
+        try:
+            self._socket.connect((host, port))
+        except socket.error as error:
+            _LOGGER.info('Socket Error (Connect): %s',error)
         self._socket.settimeout(self.READ_TIMEOUT)
         self._read = self._read_byte_from_socket
         self._write = self._write_to_socket
+        _LOGGER.info("Connected to %s:%d", host, port)
+# Mod J4yDubs End
 
     def connect_serial(self, serial_port_name):
         self._serial = serial.Serial(port=serial_port_name, baudrate=19200,
@@ -108,8 +121,12 @@ class AquaLogic():
 
     def _read_byte_from_socket(self):
         data = self._socket.recv(1)
+# Mod J4yDubs - Added length check - Begin
+        if len(data) == 0:
+            _LOGGER.info("socket empty")
         return data[0]
-    
+# Mod J4yDubs End  
+
     def _read_byte_from_serial(self):
         data = self._serial.read(1)
         if len(data) == 0:
@@ -139,14 +156,16 @@ class AquaLogic():
             _LOGGER.info('%3.3f: Sent: %s', time.monotonic(),
                          binascii.hexlify(data['frame']))
 
-            try:
-                if data['desired_states'] is not None:
-                    # Set a timer to verify the state changes
-                    # Wait 2 seconds as it can take a while for
-                    # the state to change.
-                    Timer(2.0, self._check_state, [data]).start()
-            except KeyError:
-                pass
+# Mod J4yDubs - Diabled retries - Begin
+#            try:
+#                if data['desired_states'] is not None:
+#                    # Set a timer to verify the state changes
+#                    # Wait 2 seconds as it can take a while for
+#                    # the state to change.
+#                    Timer(2.0, self._check_state, [data]).start()
+#            except KeyError:
+#                pass
+# Mod J4yDubs End
 
     def process(self, data_changed_callback):
         """Process data; returns when the reader signals EOF.
@@ -170,7 +189,6 @@ class AquaLogic():
 
                 byte = self._read()
                 frame_start_time = None
-
                 frame_rx_time = datetime.datetime.now()
 
                 while True:
@@ -214,23 +232,26 @@ class AquaLogic():
                     calculated_crc += byte
 
                 if frame_crc != calculated_crc:
-                    _LOGGER.warning('Bad CRC')
+                    _LOGGER.info('Bad CRC')
                     continue
 
                 frame_type = frame[0:2]
                 frame = frame[2:]
 
-                if frame_type == self.FRAME_TYPE_KEEP_ALIVE:
+# Mod J4yDubs - Script on EW11 (thanks markinpt) handles this - Begin
+#                if frame_type == self.FRAME_TYPE_KEEP_ALIVE:
                     # Keep alive
                     # _LOGGER.debug('%3.3f: KA', frame_start_time)
 
                     # If a frame has been queued for transmit, send it.
-                    if not self._send_queue.empty():
-                        self._send_frame()
+#                    if not self._send_queue.empty():
+#                        self._send_frame()
+#                    continue
+                self._send_frame()
+# Mod J4yDubs End
 
-                    continue
-                elif frame_type == self.FRAME_TYPE_LOCAL_WIRED_KEY_EVENT:
-                    _LOGGER.debug('%3.3f: Local Wired Key: %s',
+                if frame_type == self.FRAME_TYPE_LOCAL_WIRED_KEY_EVENT:
+                   _LOGGER.debug('%3.3f: Local Wired Key: %s',
                                   frame_start_time, binascii.hexlify(frame))
                 elif frame_type == self.FRAME_TYPE_REMOTE_WIRED_KEY_EVENT:
                     _LOGGER.debug('%3.3f: Remote Wired Key: %s',
@@ -283,7 +304,10 @@ class AquaLogic():
                     _LOGGER.debug('%3.3f: Display update: %s',
                                   frame_start_time, parts)
 
-                    self._web.text_updated(text)
+#                    self._web.text_updated(text)
+                    if self._display != text:
+                        self._display = text
+                        data_changed_callback(self)
 
                     try:
                         if parts[0] == 'Pool' and parts[1] == 'Temp':
@@ -332,6 +356,35 @@ class AquaLogic():
                             if self._check_system_msg != value:
                                 self._check_system_msg = value
                                 data_changed_callback(self)
+# Mod J4yDubs Begin
+                        elif (parts[0] == 'Chlorinator' and parts[1] == 'Off' and 
+                            parts[2] == 'No' and parts[3] == 'Flow'):
+                            # Possible pressure issue
+                            value = ' '.join(parts[2:])
+                            if self._check_system_msg != value:
+                                self._check_system_msg = value
+                                data_changed_callback(self)
+                        elif parts[0] == 'Gas' and parts[1] == 'Heater':
+                            # Gas Heater [Auto|Manual]
+                            if parts[2] == 'Auto' and parts[3] == 'Control':
+                                value = True
+                            elif parts[2] == 'Manual' and parts[3] == 'Off':
+                                value = False
+                            if self._heater_auto_mode != value:
+                                self._heater_auto_mode = value
+                            if self._heater_enabled != value:
+                                self._heater_enabled = value
+                                data_changed_callback(self)
+
+                        elif (len(parts) > 3 and parts[0] == 'Super' and parts[1] == 'Chlorinate' and
+                            parts[3] == 'remaining'):
+                            # Super chlorination <value> remaining
+                            value = parts[2].replace(" ","")
+                            value = value.replace("º",":")
+                            if self._super_chlor_time_remain != value:
+                                self._super_chlor_time_remain = value
+                                data_changed_callback(self)
+# Mod J4yDubs End           
                         elif parts[0] == 'Heater1':
                             self._heater_auto_mode = parts[1] == 'Auto'
                     except ValueError:
@@ -346,10 +399,19 @@ class AquaLogic():
                                  binascii.hexlify(frame))
         except socket.timeout:
             _LOGGER.info("socket timeout")
+# Mod J4yDubs - Close socket after timeout - Begin            
+            self._socket.close()
+            return
+# Mod J4yDubs End
         except serial.SerialTimeoutException:
             _LOGGER.info("serial timeout")
         except EOFError:
             _LOGGER.info("eof")
+# Mod J4yDubs - Add error eception - Begin            
+        except socket.error as error:
+            _LOGGER.info('Socket Error (Process): %s',error)
+            return
+# Mod J4yDubs End
 
     def _append_data(self, frame, data):
         for byte in data:
@@ -369,9 +431,14 @@ class AquaLogic():
             self._append_data(frame, key.value.to_bytes(4, byteorder='little'))
             self._append_data(frame, b'\x00')
         else:
+# MOD J4yDubs Begin
             self._append_data(frame, self.FRAME_TYPE_LOCAL_WIRED_KEY_EVENT)
+            #self._append_data(frame, self.FRAME_TYPE_REMOTE_WIRED_KEY_EVENT)
             self._append_data(frame, key.value.to_bytes(2, byteorder='little'))
+            #self._append_data(frame, b'\x00\x00')
             self._append_data(frame, key.value.to_bytes(2, byteorder='little'))
+            #self._append_data(frame, b'\x00\x00')
+# MOD J4yDubs End
 
         crc = 0
         for byte in frame:
@@ -439,6 +506,11 @@ class AquaLogic():
         return 'OK'
 
     @property
+    def display(self):
+        """Returns Display messages."""
+        return self._display
+
+    @property
     def pump_speed(self):
         """Returns the current pump speed in percent, or None if unknown.
            Requires a Hayward VSP pump connected to the AquaLogic bus."""
@@ -458,8 +530,19 @@ class AquaLogic():
 
     @property
     def is_heater_enabled(self):
-        """Returns True if HEATER_1 is on"""
-        return self.get_state(States.HEATER_1)
+#        """Returns True if HEATER_1 is on"""
+#        return self.get_state(States.HEATER_1)
+        """Returns True if gas heater is Auto, else False"""
+        return self._heater_enabled
+
+# Mod J4yDubs Begin
+    @property
+    def super_chlorinate_time_remaining(self):
+        """Returns time remaining if super chlorinate is on"""
+        if self.get_state(States.SUPER_CHLORINATE):
+            return self._super_chlor_time_remain
+        return '00:00'
+# Mod J4yDubs End
 
     @property
     def is_super_chlorinate_enabled(self):
@@ -503,6 +586,11 @@ class AquaLogic():
         if state == States.FILTER_LOW_SPEED:
             if not self._multi_speed_pump:
                 return False
+# Mod J4yDubs Begin
+            # Ignore low speed requests when the heater or superchlorination are on
+            if self._heater_enabled or self.get_state(States.SUPER_CHLORINATE):
+                return False
+# Mod J4ydubs End
             # Send the FILTER key once.
             # If the pump is in high speed, it wil switch to low speed.
             # If the pump is off the retry mechanism will send an additional
@@ -521,10 +609,12 @@ class AquaLogic():
         elif state == States.POOL or state == States.SPA:
             key = Keys.POOL_SPA
             desired_states = [{'state': state, 'enabled': not is_enabled}]
-        elif state == States.HEATER_1:
-            # TODO: is there a way to force the heater on?
-            # Perhaps press & hold?
-            return False
+# Mod J4yDubs Begin
+#        elif state == States.HEATER_1:
+#            # TODO: is there a way to force the heater on?
+#            # Perhaps press & hold?
+#            return False
+# Mod J4yDubs End
         else:
             # See if this state has a corresponding Key
             try:
