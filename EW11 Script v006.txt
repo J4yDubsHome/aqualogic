@@ -1,0 +1,42 @@
+KEEP_ALIVE = [0x10,0x02,0x01,0x01,0x00,0x14,0x10,0x03]
+RESET_CODE = [0x10,0x02,0x00,0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x14,0x10,0x03]
+UNLOCK_CODE = [0x10,0x02,0x00,0x02,0x05,0x00,0x00,0x00,0x05,0x00,0x00,0x00,0x00,0x1E,0x10,0x03]
+HOLD_CODE = [0x10,0x02,0x00,0x02,0x05,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x19,0x10,0x03]
+
+KA_NEXT_TIME = 0
+TIME_GAP = 10  # (ms) EW11 Gap Time for framing, frame sent after Gap Time expiration
+TIME_INC = 100 # (ms) Keep Alive timing interval
+
+RECV UART uart0
+	FRAME = INPUT
+	IF (FRAME == KEEP_ALIVE)
+		KA_NEXT_TIME = SYSTIME + TIME_INC - TIME_GAP
+		RETURN(FALSE) # Comment out to allow KA to client (HA)
+	END
+	OUTPUT = FRAME
+	RETURN(TRUE)
+END
+
+RECV SOCK netp
+	FRAME = INPUT
+	IF (FRAME == RESET_CODE)
+		RESET
+	ELSE
+		DT = KA_NEXT_TIME - SYSTIME
+		IF (DT != 0)
+			WHILE (DT < 0)
+				DT = DT + TIME_INC
+			END
+			WAIT(DT)
+		END
+		SEND(UART, uart0, FRAME)
+		IF (FRAME == UNLOCK_CODE)
+			FOR i,1,35,1
+				WAIT(TIME_INC)
+				SEND(UART, uart0, HOLD_CODE)	
+			END
+		END		
+		# SEND(SOCK, netp, FRAME) # Remove comment for confirmation message to client
+	END
+	RETURN(FALSE)
+END
