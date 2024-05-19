@@ -7,10 +7,10 @@ import logging
 import threading
 import time
 
-# Mod J4yDubs Begin
+# Mod Begin
 #from aqualogic.core import AquaLogic
 from .core import AquaLogic
-#Mod J4yDubs End
+#Mod End
 import voluptuous as vol
 
 from homeassistant.const import (

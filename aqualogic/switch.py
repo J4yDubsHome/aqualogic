@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from typing import Any
 
-# Mod J4yDubs Begin
+# Mod Begin
 #from aqualogic.core import States
 from .states import States
-# Mod J4yDubs End
+# Mod End
 
 import voluptuous as vol
 
@@ -32,7 +32,7 @@ SWITCH_TYPES = {
     "aux_5": "Aux 5",
     "aux_6": "Aux 6",
     "aux_7": "Aux 7",
-# Mod J4yDubs Begin
+# Mod Begin
     "pool": "Pool",
     "spa": "Spa",
     "aux_8": "Aux 8",
@@ -53,7 +53,7 @@ SWITCH_TYPES = {
     "menu": "Menu",
     "minus": "Minus",
     "plus": "Plus",
-# Mod J4yDubs End           
+# Mod End           
 }
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
@@ -99,7 +99,7 @@ class AquaLogicSwitch(SwitchEntity):
             "aux_5": States.AUX_5,
             "aux_6": States.AUX_6,
             "aux_7": States.AUX_7,
- # Mod J4yDubs Begin
+ # Mod Begin
             "pool": States.POOL,
             "spa": States.SPA,
             "aux_8": States.AUX_8,
@@ -121,12 +121,12 @@ class AquaLogicSwitch(SwitchEntity):
             "menu": States.MENU,
             "minus": States.MINUS,
             "plus": States.PLUS,
-# Mod J4yDubs End
+# Mod End
         }[switch_type]
         self._attr_name = f"AquaLogic {SWITCH_TYPES[switch_type]}"
-# Mod J4yDubs - Give switches a unique_id so they can be edited in HA UI - Begin
+# Mod - Give switches a unique_id so they can be edited in HA UI - Begin
         self._attr_unique_id = f"Aqualogic_{switch_type}"
-# Mod J4yDubs End
+# Mod End
 
     @property
     def is_on(self) -> bool:

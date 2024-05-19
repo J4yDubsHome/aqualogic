@@ -100,7 +100,7 @@ SENSOR_TYPES: tuple[AquaLogicSensorEntityDescription, ...] = (
         name="Status",
         icon="mdi:alert",
     ),
-# Mod J4yDubs Begin
+# Mod Begin
     AquaLogicSensorEntityDescription(
         key="display",
         name="Display",
@@ -121,7 +121,7 @@ SENSOR_TYPES: tuple[AquaLogicSensorEntityDescription, ...] = (
         name="Super Chlorination Countdown",
         icon="mdi:timer-sand",
     ),
-# Mod J4yDubs End
+# Mod End
 )
 
 SENSOR_KEYS: list[str] = [desc.key for desc in SENSOR_TYPES]
@@ -169,9 +169,9 @@ class AquaLogicSensor(SensorEntity):
         self.entity_description = description
         self._processor = processor
         self._attr_name = f"AquaLogic {description.name}"
-# Mod J4yDubs - Give sensors a unique_id so they can be edited in HA UI- Begin
+# Mod - Give sensors a unique_id so they can be edited in HA UI- Begin
         self._attr_unique_id = f"Aqualogic_{description.key}"
-# Mod J4yDubs End
+# Mod End
 
     async def async_added_to_hass(self) -> None:
         """Register callbacks."""
