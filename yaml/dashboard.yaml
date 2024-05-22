@@ -29,16 +29,20 @@ views:
           - type: tile
             entity: switch.aqualogic_filter
             name: Filter
+            icon: mdi:air-filter
           - type: tile
             entity: switch.aqualogic_aux_1
             name: Vacuum
+            icon: mdi:vacuum-outline
           - type: tile
             entity: switch.aqualogic_lights
             name: Lights
+            icon: mdi:lightbulb-spot
           - type: tile
             entity: switch.aqualogic_service
             vertical: false
             name: Service
+            icon: mdi:account-wrench-outline
       - type: grid
         cards:
           - type: entity
@@ -53,6 +57,7 @@ views:
             entity: switch.aqualogic_plus
             name: +
             show_state: false
+            icon: mdi:plus-circle-outline
           - show_name: false
             show_icon: true
             type: button
@@ -60,13 +65,14 @@ views:
               action: toggle
             entity: switch.aqualogic_left
             name: <
+            icon: mdi:arrow-left-circle-outline
           - show_name: false
             show_icon: true
             type: button
             tap_action:
               action: toggle
             entity: switch.aqualogic_menu
-            icon: ''
+            icon: mdi:menu
             name: Menu
             show_state: false
           - show_name: false
@@ -76,6 +82,7 @@ views:
               action: toggle
             entity: switch.aqualogic_right
             name: '>'
+            icon: mdi:arrow-right-circle-outline
           - show_name: false
             show_icon: true
             type: button
@@ -83,5 +90,6 @@ views:
               action: toggle
             entity: switch.aqualogic_minus
             name: '-'
+            icon: mdi:minus-circle-outline
     cards: []
 title: Mobile
