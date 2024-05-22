@@ -11,12 +11,15 @@ views:
             detail: 1
             entity: sensor.aqualogic_pool_temperature
             name: Water Temp
+            icon: mdi:pool-thermometer
           - type: tile
             entity: sensor.aqualogic_salt_level
             name: Salt Level
+            icon: mdi:shaker-outline
           - type: tile
             entity: sensor.aqualogic_pool_chlorinator
             name: Chlorinator
+            icon: ''
           - type: tile
             entity: switch.aqualogic_super_chlorinate
             name: Super Chlorinate
