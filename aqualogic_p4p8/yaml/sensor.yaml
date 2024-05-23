@@ -1,0 +1,15 @@
+- platform: aqualogic
+  monitored_conditions:
+    - air_temp
+    - display
+    #- is_heater_enabled
+    #- is_super_chlorinate_enabled
+    - pool_chlorinator
+    - pool_temp
+    #- pump_power
+    #- pump_speed
+    - salt_level
+    #- spa_chlorinator
+    #- spa_temp
+    - status
+    - super_chlorinate_time_remaining
