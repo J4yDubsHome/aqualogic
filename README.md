@@ -2,7 +2,7 @@
 
 Forked from https://github.com/swilson/aqualogic.  This fork uses a script on a EW11 to handle the timing of the frame sends locally instead of over the network.
 
-- Removed keep_alive and retry code.  This is done on a script on the EW11.
+- Removed keep_alive and retry code (config option now).  This is done on a script on the EW11.
   - Script from https://www.troublefreepool.com/threads/aql-ps-8-remote-emulator-app.244915/
 - Added unique_id to switches and sensors so that they can be edited in the HA UI.
 - Added service, menu, up, down, plus, minus switches.
@@ -10,8 +10,8 @@ Forked from https://github.com/swilson/aqualogic.  This fork uses a script on a 
 - Migrated in code from other forks (heater stuff is untested in this fork).
 - Added more error handling.
 - Commented out web server code.
+- Added config options for device, usescript, and p4p8.
 - Other small tweaks.
-- This fork is for a P4, but you can change to a P8 in the core.py. Look at get_key_event_frame(). 
 ----
 A python library to interface with Hayward/Goldline AquaLogic/ProLogic pool controllers. Based on Goldline prototol decoding work done by draythomp (http://www.desert-home.com/p/swimming-pool.html). Used by the [Home Assistant AquaLogic component](https://www.home-assistant.io/components/aqualogic/).
 
