@@ -20,7 +20,7 @@ Forked from https://github.com/swilson/aqualogic.  This fork uses a script on a 
 - Download the files from this repository (Code > Download Zip)
 - Place the aqualogic_p4p8 directory in config/custom_components/
 - Modify your configuartion.YAML in config and add the below.  Other examples are in the "YAML Examples" directory (note I split the configuations into 3 files to keep configuration.YAML clean, this is a personal preference)
-- Restart HA and look for teh new entities that start with aqualogic
+- Restart HA and look for the new entities that start with aqualogic
 
 ```
 aqualogic_p4p8:
