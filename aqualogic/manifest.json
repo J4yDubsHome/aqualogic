@@ -3,7 +3,7 @@
     "name": "AquaLogic",
     "documentation": "https://www.home-assistant.io/integrations/aqualogic",
     "requirements": ["aqualogic==2.6"],
-    "version": "2.6.0",
+    "version": "2.7.0",
     "codeowners": [],
     "iot_class": "local_push",
     "loggers": ["aqualogic"]

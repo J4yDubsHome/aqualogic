@@ -69,6 +69,7 @@ class AquaLogic():
         self._heater_enabled = False
         self._super_chlor_time_remain = '00:00'
         self._display = None
+        self._p4p8 = None
 
 #        if web_port and web_port != 0:
 #            # Start the web server
@@ -149,28 +150,31 @@ class AquaLogic():
     def _write_to_io(self, data):
         self._io.write(data)
         
-    def _send_frame(self):
+    def _send_frame(self, usescript):
         if not self._send_queue.empty():
             data = self._send_queue.get(block=False)
             self._write(data['frame'])
             _LOGGER.info('%3.3f: Sent: %s', time.monotonic(),
                          binascii.hexlify(data['frame']))
 
-# Mod - Diabled retries - Begin
-#            try:
-#                if data['desired_states'] is not None:
-#                    # Set a timer to verify the state changes
-#                    # Wait 2 seconds as it can take a while for
-#                    # the state to change.
-#                    Timer(2.0, self._check_state, [data]).start()
-#            except KeyError:
-#                pass
+# Mod - Diabled retries if using script - Begin
+        if not usescript:
+            try:
+                if data['desired_states'] is not None:
+                    # Set a timer to verify the state changes
+                    # Wait 2 seconds as it can take a while for
+                    # the state to change.
+                    Timer(2.0, self._check_state, [data]).start()
+            except KeyError:
+                pass
 # Mod End
 
-    def process(self, data_changed_callback):
+    def process(self, data_changed_callback, usescript, p4p8):
+#    def process(self, data_changed_callback):
         """Process data; returns when the reader signals EOF.
         Callback is notified when any data changes."""
         # pylint: disable=too-many-locals,too-many-branches,too-many-statements
+        self._p4p8 = p4p8
         try:
             while True:
                 # Data framing (from the AQ-CO-SERIAL manual):
@@ -238,16 +242,18 @@ class AquaLogic():
                 frame_type = frame[0:2]
                 frame = frame[2:]
 
-# Mod - Script on EW11 (thanks markinpt) handles this - Begin
-#                if frame_type == self.FRAME_TYPE_KEEP_ALIVE:
-                    # Keep alive
-                    # _LOGGER.debug('%3.3f: KA', frame_start_time)
+# Mod - Script on EW11 (thanks markinpt) handles keepalive else do it here - Begin
+                if not usescript:
+                    if frame_type == self.FRAME_TYPE_KEEP_ALIVE:
+                        # Keep alive
+                        _LOGGER.debug('%3.3f: KA', frame_start_time)
 
-                    # If a frame has been queued for transmit, send it.
-#                    if not self._send_queue.empty():
-#                        self._send_frame()
-#                    continue
-                self._send_frame()
+                        # If a frame has been queued for transmit, send it.
+                        if not self._send_queue.empty():
+                            self._send_frame(usescript)
+                        continue
+                else:
+                    self._send_frame(usescript)
 # Mod End
 
                 if frame_type == self.FRAME_TYPE_LOCAL_WIRED_KEY_EVENT:
@@ -304,10 +310,12 @@ class AquaLogic():
                     _LOGGER.debug('%3.3f: Display update: %s',
                                   frame_start_time, parts)
 
+# Mod Begin
 #                    self._web.text_updated(text)
                     if self._display != text:
                         self._display = text
                         data_changed_callback(self)
+# Mod End
 
                     try:
                         if parts[0] == 'Pool' and parts[1] == 'Temp':
@@ -433,11 +441,12 @@ class AquaLogic():
         else:
 # MOD Begin
             self._append_data(frame, self.FRAME_TYPE_LOCAL_WIRED_KEY_EVENT)
-            #self._append_data(frame, self.FRAME_TYPE_REMOTE_WIRED_KEY_EVENT)
             self._append_data(frame, key.value.to_bytes(2, byteorder='little'))
-            #self._append_data(frame, b'\x00\x00')
+            if self._p4p8 == 'p8':
+                self._append_data(frame, b'\x00\x00')
             self._append_data(frame, key.value.to_bytes(2, byteorder='little'))
-            #self._append_data(frame, b'\x00\x00')
+            if self._p4p8 == 'p8':
+                self._append_data(frame, b'\x00\x00')
 # MOD End
 
         crc = 0
