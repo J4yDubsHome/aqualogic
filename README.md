@@ -10,7 +10,7 @@ Forked from https://github.com/swilson/aqualogic.  This fork uses a script on a 
 - Migrated in code from other forks (heater stuff is untested in this fork).
 - Added more error handling.
 - Commented out web server code.
-- Added config options for device, usescript, and p4p8.
+- Added config options for device, usescript, and p4p8 so that it's not EW11 or p4 specific.
 - Renamed domain and directory so that it's seperate from the built-in AquaLogic intergration.
 - Other small tweaks.
   
