@@ -32,12 +32,12 @@ aqualogic_p4p8:
   p4p8: p4              #Set to p4 or p8
 
 sensor:
-  - platform: aqualogic_ew11
+  - platform: aqualogic_p4p8
     monitored_conditions:
       - pool_temp
       - <sensor list in "YAML Examples" directory>
 switch:
-  - platform: aqualogic_ew11
+  - platform: aqualogic_p4p8
     monitored_conditions:
       - filter
       - <switch list in "YAML Examples" directory>
