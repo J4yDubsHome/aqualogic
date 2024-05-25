@@ -1,0 +1,98 @@
+views:
+  - title: Pool
+    path: pool
+    type: sections
+    max_columns: 1
+    sections:
+      - type: grid
+        cards:
+          - graph: line
+            type: sensor
+            detail: 1
+            entity: sensor.aqualogic_pool_temperature
+            name: Water Temp
+            icon: mdi:pool-thermometer
+          - type: tile
+            entity: sensor.aqualogic_salt_level
+            name: Salt Level
+            icon: mdi:shaker-outline
+          - type: tile
+            entity: sensor.aqualogic_pool_chlorinator
+            name: Chlorinator
+            icon: ''
+          - type: tile
+            entity: switch.aqualogic_super_chlorinate
+            name: Super Chlorinate
+            icon: mdi:chemical-weapon
+          - type: tile
+            entity: sensor.aqualogic_super_chlorination_countdown
+            name: Super Chlorinate Time
+      - type: grid
+        cards:
+          - type: tile
+            entity: switch.aqualogic_filter
+            name: Filter
+            icon: mdi:air-filter
+          - type: tile
+            entity: switch.aqualogic_aux_1
+            name: Vacuum
+            icon: mdi:vacuum-outline
+          - type: tile
+            entity: switch.aqualogic_lights
+            name: Lights
+            icon: mdi:lightbulb-spot
+          - type: tile
+            entity: switch.aqualogic_service
+            vertical: false
+            name: Service
+            icon: mdi:account-wrench-outline
+      - type: grid
+        cards:
+          - type: entity
+            icon: mdi:alarm-panel-outline
+            entity: sensor.aqualogic_display
+            state_color: false
+          - show_name: false
+            show_icon: true
+            type: button
+            tap_action:
+              action: toggle
+            entity: switch.aqualogic_plus
+            name: +
+            show_state: false
+            icon: mdi:plus-circle-outline
+          - show_name: false
+            show_icon: true
+            type: button
+            tap_action:
+              action: toggle
+            entity: switch.aqualogic_left
+            name: <
+            icon: mdi:arrow-left-circle-outline
+          - show_name: false
+            show_icon: true
+            type: button
+            tap_action:
+              action: toggle
+            entity: switch.aqualogic_menu
+            icon: mdi:menu
+            name: Menu
+            show_state: false
+          - show_name: false
+            show_icon: true
+            type: button
+            tap_action:
+              action: toggle
+            entity: switch.aqualogic_right
+            name: '>'
+            icon: mdi:arrow-right-circle-outline
+          - show_name: false
+            show_icon: true
+            type: button
+            tap_action:
+              action: toggle
+            entity: switch.aqualogic_minus
+            name: '-'
+            icon: mdi:minus-circle-outline
+    cards: []
+title: Mobile
