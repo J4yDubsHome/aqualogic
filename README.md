@@ -1,6 +1,6 @@
 # AquaLogic
 
-Forked from https://github.com/swilson/aqualogic.  This fork uses a script on a EW11 to handle the timing of the frame sends locally instead of over the network.
+Forked from https://github.com/swilson/aqualogic.  
 
 - Removed keep_alive and retry code (config option now).  This is done on a script on the EW11.
   - Script from https://www.troublefreepool.com/threads/aql-ps-8-remote-emulator-app.244915/
