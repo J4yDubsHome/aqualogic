@@ -305,8 +305,9 @@ class AquaLogic():
                         data_changed_callback(self)
                 elif frame_type == self.FRAME_TYPE_DISPLAY_UPDATE:
                     # Convert LCD-specific degree symbol and decode to utf-8
-                    text = frame.replace(b'\xdf', b'\xc2\xb0').decode('utf-8')
+                    # text = frame.replace(b'\xdf', b'\xc2\xb0').decode('utf-8')
                     # text = frame.replace(b'\xdf', b'\xc2\xb0').decode('latin-1')
+                    text = frame.replace(b'\xdf', b'\xc2\xb0').replace(b'\xba', b'\xc2\xb0').decode('utf-8')
                     parts = text.split()
                     _LOGGER.debug('%3.3f: Display update: %s',
                                   frame_start_time, parts)
