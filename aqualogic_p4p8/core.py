@@ -305,12 +305,17 @@ class AquaLogic():
                         data_changed_callback(self)
                 elif frame_type == self.FRAME_TYPE_DISPLAY_UPDATE:
                     # Convert LCD-specific degree symbol and decode to utf-8
-                    # text = frame.replace(b'\xdf', b'\xc2\xb0').decode('utf-8')
-                    # text = frame.replace(b'\xdf', b'\xc2\xb0').decode('latin-1')
-                    text = frame.replace(b'\xdf', b'\xc2\xb0').replace(b'\xba', b'\xc2\xb0').decode('utf-8')
+                    #text = frame.replace(b'\xdf', b'\xc2\xb0').replace(b'\xba', b'\xc2\xb0').decode('utf-8')
+                    #text = frame.replace(b'\xdf', b'\xc2\xb0').decode('utf-8')
+                    if self._p4p8 == 'p8':
+                        text = self.Byte2string(frame)
+                    else:
+                        text = frame.replace(b'\xdf', b'\xc2\xb0').replace(b'\xba', b'\xc2\xb0').decode('utf-8')
                     parts = text.split()
+#                    _LOGGER.debug('%3.3f: Display update: %s',
+#                                  frame_start_time, parts)
                     _LOGGER.debug('%3.3f: Display update: %s',
-                                  frame_start_time, parts)
+                                  frame_start_time, text)                                  
 
 # Mod Begin
 #                    self._web.text_updated(text)
@@ -421,6 +426,31 @@ class AquaLogic():
         except socket.error as error:
             _LOGGER.info('Socket Error (Process): %s',error)
             return
+# Mod End
+# Mod Begin
+    def Byte2string(self, frame):
+        tStr = ""
+        bStr = ""
+        slen = len(frame)
+        isplt = slen // 2
+        for i in range(0, slen-1):
+            if frame[i] == 0:
+                break
+            cc = chr(frame[i] - 128) if frame[i] >= 128 else chr(frame[i])
+            if i < isplt:
+                tStr += cc
+            else:
+                if frame[i] != 186 and (i == 0 or frame[i-1] != 186):
+                    if frame[i] >= 128 and (i == 0 or frame[i-1] < 128):
+                        bStr += "["
+                    elif frame[i] < 128 and (i == 0 or frame[i-1] >= 128):
+                        bStr += "]"
+                bStr += cc
+        if "[" in bStr and "]" not in bStr:
+            bStr += "]"
+        result = (tStr.strip() + "\n" + bStr.strip())
+        return result.replace("  ", " ").replace("  ", " ").replace("_", "°").replace(" :", ":").replace("[ ", "[").replace(" ]", "]").strip()
+        #return result.replace("_", "°").replace(" :", ":").replace("[ ", "[").replace(" ]", "]").strip()
 # Mod End
 
     def _append_data(self, frame, data):
