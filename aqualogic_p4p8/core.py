@@ -450,7 +450,6 @@ class AquaLogic():
             bStr += "]"
         result = (tStr.strip() + "\n" + bStr.strip())
         return result.replace("  ", " ").replace("  ", " ").replace("_", "°").replace(" :", ":").replace("[ ", "[").replace(" ]", "]").strip()
-        #return result.replace("_", "°").replace(" :", ":").replace("[ ", "[").replace(" ]", "]").strip()
 # Mod End
 
     def _append_data(self, frame, data):
