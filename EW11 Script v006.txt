@@ -1,55 +1,58 @@
 KEEP_ALIVE = [0x10,0x02,0x01,0x01,0x00,0x14,0x10,0x03]
-P8RESET_CODE = [0x10,0x02,0x00,0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x14,0x10,0x03]
-P8UNLOCK_CODE = [0x10,0x02,0x00,0x02,0x05,0x00,0x00,0x00,0x05,0x00,0x00,0x00,0x00,0x1E,0x10,0x03]
-P8HOLD_CODE = [0x10,0x02,0x00,0x02,0x05,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x19,0x10,0x03]
-P4RESET_CODE = [0x10,0x02,0x00,0x02,0x00,0x00,0x00,0x00,0x00,0x14,0x10,0x03]
-P4UNLOCK_CODE = [0x10,0x02,0x00,0x02,0x05,0x00,0x05,0x00,0x00,0x1E,0x10,0x03]
-P4HOLD_CODE = [0x10,0x02,0x00,0x02,0x05,0x00,0x00,0x00,0x00,0x19,0x10,0x03]
 
+RESET_CODE = [0x10,0x02,0x00,0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x14,0x10,0x03]
+UNLOCK_CODE = [0x10,0x02,0x00,0x02,0x05,0x00,0x00,0x00,0x05,0x00,0x00,0x00,0x00,0x1E,0x10,0x03]
+HOLD_CODE = [0x10,0x02,0x00,0x02,0x05,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x19,0x10,0x03]
 
-KA_NEXT_TIME = 0	# (ms) Next Keep Alive Arival Time
-TIME_GAP = 10  		# (ms) EW11 Gap Time for framing, frame sent after Gap Time expiration
-TIME_INC = 100 		# (ms) Keep Alive Timing Interval - Adjust for timing errors
+RESET_CODE_P4 = [0x10,0x02,0x00,0x02,0x00,0x00,0x00,0x00,0x00,0x14,0x10,0x03]
+UNLOCK_CODE_P4 = [0x10,0x02,0x00,0x02,0x05,0x00,0x05,0x00,0x00,0x1E,0x10,0x03]
+HOLD_CODE_P4 = [0x10,0x02,0x00,0x02,0x05,0x00,0x00,0x00,0x00,0x19,0x10,0x03]
+
+KA_NEXT_TIME = 0    # (ms) Next Keep Alive Arival Time
+TIME_GAP = 10          # (ms) EW11 Gap Time for framing, frame sent after Gap Time expiration
+TIME_INC = 100         # (ms) Keep Alive Timing Interval - Adjust for timing errors
 
 RECV UART uart0
-	FRAME = INPUT  	# Received from RS485 bus
-	IF (FRAME == KEEP_ALIVE)
-		KA_NEXT_TIME = SYSTIME + TIME_INC - TIME_GAP
-		RETURN(FALSE) # Comment out to allow KA to client (HA)
-	END
-	OUTPUT = FRAME
-	RETURN(TRUE)
+    FRAME = INPUT      # Received from RS485 bus
+    IF (FRAME == KEEP_ALIVE)
+        KA_NEXT_TIME = SYSTIME + TIME_INC - TIME_GAP
+        RETURN(FALSE) # Comment out to allow KA to client (HA)
+    END
+    OUTPUT = FRAME
+    RETURN(TRUE)
 END
 
 RECV SOCK netp
-	FRAME = INPUT  	# Received from application
-	IF (FRAME == P8RESET_CODE || FRAME == P4RESET_CODE )
-		RESET
-	ELSE
-		DT = KA_NEXT_TIME - SYSTIME
-		IF (DT != 0)
-			WHILE (DT < 0)
-				DT = DT + TIME_INC
-			END
-			WAIT(DT)
-		END
-		IF (FRAME == P8UNLOCK_CODE)
-			FOR i,1,35,1
-				SEND(UART, uart0, P8HOLD_CODE)	
-				WAIT(TIME_INC)
-			END
-		ELSE
-			SEND(UART, uart0, FRAME) # Send frame right after Keep Alive
-		END			
-		IF (FRAME == P4UNLOCK_CODE)
-			FOR i,1,35,1
-				SEND(UART, uart0, P4HOLD_CODE)	
-				WAIT(TIME_INC)
-			END
-		ELSE
-			SEND(UART, uart0, FRAME) # Send frame right after Keep Alive
-		END		
-		# SEND(SOCK, netp, FRAME) # Remove comment for confirmation message to client
-	END
-	RETURN(FALSE)
+    FRAME = INPUT      # Received from application
+    IF (FRAME == RESET_CODE || FRAME == RESET_CODE_P4)
+        RESET
+    ELSE
+        UNLOCK = FALSE
+        IF (FRAME == UNLOCK_CODE)
+            UNLOCK = TRUE
+            CODE = HOLD_CODE
+        ELSE
+            IF (FRAME == UNLOCK_CODE_P4)
+                UNLOCK = TRUE
+                CODE = HOLD_CODE_P4
+            END
+        END
+        DT = KA_NEXT_TIME - SYSTIME
+        IF (DT != 0)
+            WHILE (DT < 0)
+                DT = DT + TIME_INC
+            END
+            WAIT(DT)
+        END
+        IF (UNLOCK)
+            FOR i,1,35,1
+                SEND(UART, uart0, CODE)    
+                WAIT(TIME_INC)
+            END
+        ELSE
+            SEND(UART, uart0, FRAME) # Send frame right after Keep Alive
+        END        
+        # SEND(SOCK, netp, FRAME) # Remove comment for confirmation message to client
+    END
+    RETURN(FALSE)
 END
