@@ -70,6 +70,7 @@ class AquaLogic():
         self._super_chlor_time_remain = '00:00'
         self._display = None
         self._p4p8 = None
+        self._configmenu = False
 
 #        if web_port and web_port != 0:
 #            # Start the web server
@@ -175,6 +176,7 @@ class AquaLogic():
         Callback is notified when any data changes."""
         # pylint: disable=too-many-locals,too-many-branches,too-many-statements
         self._p4p8 = p4p8
+        
         try:
             while True:
                 # Data framing (from the AQ-CO-SERIAL manual):
@@ -194,6 +196,7 @@ class AquaLogic():
                 byte = self._read()
                 frame_start_time = None
                 frame_rx_time = datetime.datetime.now()
+                
 
                 while True:
                     # Search for FRAME_DLE + FRAME_STX
@@ -399,6 +402,10 @@ class AquaLogic():
                             if self._super_chlor_time_remain != value:
                                 self._super_chlor_time_remain = value
                                 data_changed_callback(self)
+
+                        elif parts[0] == 'Configuration' and parts[1] == 'Menu-Locked':
+                            self._configmenu = True
+
 # Mod End           
                         elif parts[0] == 'Heater1':
                             self._heater_auto_mode = parts[1] == 'Auto'
@@ -450,6 +457,7 @@ class AquaLogic():
             bStr += "]"
         result = (tStr.strip() + "\n" + bStr.strip())
         return result.replace("  ", " ").replace("  ", " ").replace("_", "°").replace(" :", ":").replace("[ ", "[").replace(" ]", "]").strip()
+        #return result.replace("_", "°").replace(" :", ":").replace("[ ", "[").replace(" ]", "]").strip()
 # Mod End
 
     def _append_data(self, frame, data):
@@ -472,10 +480,14 @@ class AquaLogic():
         else:
 # MOD Begin
             self._append_data(frame, self.FRAME_TYPE_LOCAL_WIRED_KEY_EVENT)
-            self._append_data(frame, key.value.to_bytes(2, byteorder='little'))
             if self._p4p8 == 'p8':
                 self._append_data(frame, b'\x00\x00')
-            self._append_data(frame, key.value.to_bytes(2, byteorder='little'))
+            if self._configmenu == True and key.value == 0x0001:
+                self._append_data(frame, b'\x05\x00\x05\x00')
+                self._configmenu = False
+            else:
+                self._append_data(frame, key.value.to_bytes(2, byteorder='little'))
+                self._append_data(frame, key.value.to_bytes(2, byteorder='little'))
             if self._p4p8 == 'p8':
                 self._append_data(frame, b'\x00\x00')
 # MOD End
