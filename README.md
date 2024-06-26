@@ -42,6 +42,8 @@ switch:
       - filter
       - <switch list in "YAML Examples" directory>
 ```
+![image](https://github.com/J4yDubsHome/aqualogic/assets/155119234/9af8babb-eb2d-4836-90cb-6ea8a8c40428)
+
 ----
 ## Original readme
 A python library to interface with Hayward/Goldline AquaLogic/ProLogic pool controllers. Based on Goldline prototol decoding work done by draythomp (http://www.desert-home.com/p/swimming-pool.html). Used by the [Home Assistant AquaLogic component](https://www.home-assistant.io/components/aqualogic/).
