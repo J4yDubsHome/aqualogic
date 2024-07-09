@@ -1,0 +1,6 @@
+host: 192.168.1.160   #Set to HostName, IP Address, or Serial path
+#host: /dev/ttyUSB0   #Serial example
+port: 4328            #Set port if using Network device
+device: socket        #Set to socket or serial
+usescript: True       #Set to False if not using script on network device
+p4p8: p4              #Set to p4 or p8
