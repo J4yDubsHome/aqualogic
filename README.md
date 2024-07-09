@@ -3,7 +3,7 @@
 Forked from https://github.com/swilson/aqualogic.  
 
 - Removed keep_alive and retry code (config option now).  This is done on a script on the EW11.
-  - Script from https://www.troublefreepool.com/threads/aql-ps-8-remote-emulator-app.244915/
+  - Script from https://docs.google.com/document/d/18dtxOf3cBQ9h4sAxC_g3rcm20pw5Xv7ds5K6pCOaUds/edit#heading=h.wg5enocutlte
 - Added unique_id to switches and sensors so that they can be edited in the HA UI.
 - Added service, menu, up, down, plus, minus switches.
 - Added display sensor.
