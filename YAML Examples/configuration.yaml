@@ -12,6 +12,6 @@ scene: !include scenes.yaml
 notify: !include notify.yaml
 logger: !include logger.yaml
 
-aqualogic: !include aqualogic_p4p8.yaml
+aqualogic: !include aqualogic.yaml
 sensor: !include sensor.yaml
 switch: !include switch.yaml
