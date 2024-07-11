@@ -21,6 +21,7 @@ class Keys(IntEnum):
     AUX_6 = 0x4000
     AUX_7 = 0x8000
     # These are only valid for WIRELESS_KEY_EVENTs
+    SUPER_CHLORINATE = 0x04000000    
     VALVE_3 = 0x00010000
     VALVE_4 = 0x00020000
     HEATER_1 = 0x00040000
