@@ -8,10 +8,14 @@ views:
         cards:
           - graph: line
             type: sensor
-            detail: 1
+            detail: 2
             entity: sensor.aqualogic_pool_temperature
-            name: Water Temp
+            name: Pool Temp
             icon: mdi:pool-thermometer
+            layout_options:
+              grid_columns: 4
+              grid_rows: 3
+            hours_to_show: 12
           - type: tile
             entity: sensor.aqualogic_salt_level
             name: Salt Level
@@ -52,6 +56,9 @@ views:
             icon: mdi:alarm-panel-outline
             entity: sensor.aqualogic_display
             state_color: false
+            layout_options:
+              grid_columns: 4
+              grid_rows: 2
           - show_name: false
             show_icon: true
             type: button
@@ -95,4 +102,3 @@ views:
             name: '-'
             icon: mdi:minus-circle-outline
     cards: []
-title: Mobile
