@@ -1,0 +1,63 @@
+KEEP_ALIVE = [0x10,0x02,0x01,0x01,0x00,0x14,0x10,0x03]
+
+RESET_CODE_PS = [0x10,0x02,0x00,0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x14,0x10,0x03]
+UNLOCK_CODE_PS = [0x10,0x02,0x00,0x02,0x05,0x00,0x00,0x00,0x05,0x00,0x00,0x00,0x00,0x1E,0x10,0x03]
+HOLD_CODE_PS = [0x10,0x02,0x00,0x02,0x05,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x19,0x10,0x03]
+
+RESET_CODE_P4 = [0x10,0x02,0x00,0x02,0x00,0x00,0x00,0x00,0x00,0x14,0x10,0x03]
+UNLOCK_CODE_P4 = [0x10,0x02,0x00,0x02,0x05,0x00,0x05,0x00,0x00,0x1E,0x10,0x03]
+HOLD_CODE_P4 = [0x10,0x02,0x00,0x02,0x05,0x00,0x00,0x00,0x00,0x19,0x10,0x03]
+
+TIME_OFF = 2		# (ms) Timing offset for fine tuning 1-4
+TIME_GAP = 10  		# (ms) EW11 Gap Time for framing set in configuration, frame sent after Gap Time expiration
+TIME_INC = 100 		# (ms) Keep Alive Timing Interval
+TIME_SEND = 0		# (ms) Time to send next key
+HOLD_LOOP = 35		# 100ms hold message count
+
+RECV UART uart0
+	FRAME = INPUT  	# Received from RS485 bus
+	TS = SYSTIME + TIME_INC - TIME_GAP + TIME_OFF
+	IF (FRAME == KEEP_ALIVE)
+		TIME_SEND = TS
+		RETURN(FALSE) 	# Comment out to allow KA to client (HA)
+	END
+	OUTPUT = FRAME
+	RETURN(TRUE)
+END
+
+RECV SOCK netp
+	FRAME = INPUT  	# Received from application
+	IF (FRAME == RESET_CODE_PS || FRAME == RESET_CODE_P4)
+		RESET
+	ELSE
+		UNLOCK = FALSE
+		IF (FRAME == UNLOCK_CODE_PS)
+			UNLOCK = TRUE
+			CODE = HOLD_CODE_PS
+		ELSE
+			IF (FRAME == UNLOCK_CODE_P4)
+				UNLOCK = TRUE
+				CODE = HOLD_CODE_P4
+			END
+		END
+		DT = TIME_SEND - SYSTIME
+		IF (DT != 0)
+			WHILE (DT < 0)
+				TIME_SEND = TIME_SEND + TIME_INC
+				DT = TIME_SEND - SYSTIME
+			END
+			WAIT(DT)
+		END
+		SEND(UART, uart0, FRAME) # Send frame right after Keep Alive
+		IF (UNLOCK)
+			FOR i,1,HOLD_LOOP,1
+				TIME_SEND = TIME_SEND + TIME_INC
+				DT = TIME_SEND - SYSTIME
+				WAIT(DT)
+				SEND(UART, uart0, CODE)	
+			END
+		END		
+		# SEND(SOCK, netp, FRAME) # Remove comment for confirmation message to client
+	END
+	RETURN(FALSE)
+END
