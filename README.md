@@ -28,7 +28,7 @@ aqualogic_p4p8:
   #host: /dev/ttyUSB0   #Serial example
   port: 4328            #Set port if using a network device
   device: socket        #Set to socket or serial
-  usescript: True       #Set to False if not using script on a network device
+  usescript: True       #Set to False if not using script on a network device (EW11)
   p4p8: p4              #Set to p4 or p8
 
 sensor:
