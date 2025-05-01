@@ -35,6 +35,7 @@ sensor:
   - platform: aqualogic_p4p8
     monitored_conditions:
       - pool_temp
+      - display
       - <sensor list in "YAML Examples" directory>
 switch:
   - platform: aqualogic_p4p8
