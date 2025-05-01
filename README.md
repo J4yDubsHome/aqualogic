@@ -43,6 +43,7 @@ switch:
       - filter
       - <switch list in "YAML Examples" directory>
 ```
+##Example Dashboard
 ![image](https://github.com/J4yDubsHome/aqualogic/assets/155119234/9af8babb-eb2d-4836-90cb-6ea8a8c40428)
 
 ----
