@@ -36,12 +36,12 @@ sensor:
     monitored_conditions:
       - pool_temp
       - display
-      - <sensor list in "YAML Examples" directory>
+      #- <sensor list in "YAML Examples" directory>
 switch:
   - platform: aqualogic_p4p8
     monitored_conditions:
       - filter
-      - <switch list in "YAML Examples" directory>
+      #- <switch list in "YAML Examples" directory>
 ```
 ## Example Dashboard
 ![image](https://github.com/J4yDubsHome/aqualogic/assets/155119234/9af8babb-eb2d-4836-90cb-6ea8a8c40428)
