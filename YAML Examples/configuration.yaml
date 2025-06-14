@@ -12,6 +12,7 @@ scene: !include scenes.yaml
 notify: !include notify.yaml
 logger: !include logger.yaml
 
+# This adds the Aqualogic integration
 aqualogic_p4p8: !include aqualogic.yaml
 sensor: !include sensor.yaml
 switch: !include switch.yaml
