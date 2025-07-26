@@ -479,12 +479,13 @@ class AquaLogic():
             self._append_data(frame, b'\x00')
         else:
 # MOD Begin
+            if self._configmenu and key.value == Keys.RIGHT:
+                #self._append_data(frame, b'\x05\x00\x05\x00') #Added LEFTRIGHT to keys.py
+                key = Keys.LEFTRIGHT
+                self._configmenu = False
             self._append_data(frame, self.FRAME_TYPE_LOCAL_WIRED_KEY_EVENT)
             if self._p4p8 == 'p8':
                 self._append_data(frame, b'\x00\x00')
-            if self._configmenu == True and key.value == Keys.RIGHT: # Unlock Config menu
-                self._append_data(frame, b'\x05\x00\x05\x00')
-                self._configmenu = False
             else:
                 self._append_data(frame, key.value.to_bytes(2, byteorder='little'))
                 self._append_data(frame, key.value.to_bytes(2, byteorder='little'))
