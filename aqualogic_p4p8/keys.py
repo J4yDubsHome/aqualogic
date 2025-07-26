@@ -7,6 +7,7 @@ class Keys(IntEnum):
     RIGHT = 0x0001
     MENU = 0x0002
     LEFT = 0x0004
+    LEFTRIGHT = 0x0005
     SERVICE = 0x0008
     MINUS = 0x0010
     PLUS = 0x0020
