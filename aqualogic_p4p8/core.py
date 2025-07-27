@@ -486,9 +486,8 @@ class AquaLogic():
             self._append_data(frame, self.FRAME_TYPE_LOCAL_WIRED_KEY_EVENT)
             if self._p4p8 == 'p8':
                 self._append_data(frame, b'\x00\x00')
-            else:
-                self._append_data(frame, key.value.to_bytes(2, byteorder='little'))
-                self._append_data(frame, key.value.to_bytes(2, byteorder='little'))
+            self._append_data(frame, key.value.to_bytes(2, byteorder='little'))
+            self._append_data(frame, key.value.to_bytes(2, byteorder='little'))
             if self._p4p8 == 'p8':
                 self._append_data(frame, b'\x00\x00')
 # MOD End
